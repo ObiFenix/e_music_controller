@@ -1,15 +1,5 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
-import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography'
-import { Link } from 'react-router-dom';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
+import { Grid } from '@material-ui/core';
 
 export default class Room extends Component {
     constructor(props) {
@@ -24,7 +14,7 @@ export default class Room extends Component {
     }
 
     getRoomDetails() {
-        fetch(`/api/get-room?code=#${this.roomCode}`)
+        fetch(`/api/get-room?code=${this.roomCode}`)
             .then((response) => response.json())
             .then((data) => {
                 this.setState({
@@ -37,16 +27,13 @@ export default class Room extends Component {
     }
 
     render() {
-        console.log(this.state);
-        console.log(this.roomCode);
-        debugger;
         return (
-            <div>
-                <h3>Room <span Style="color: 444">{this.roomCode}</span></h3>
+            <Grid align="center">
+                <h3>Room <span className="text-green">{this.roomCode}</span></h3>
                 <p>Votes: {this.state.votesToSkip}</p>
-                <p>Guest Can Pause: {this.state.guestCanPause.toString()}</p>
-                <p>Host: {this.state.isHost.toString()}</p>
-            </div>
+                <p>Guest Can Pause: {this.state.guestCanPause ? "Yes" : "No"}</p>
+                <p>Host: {this.state.isHost ? "Owner" : "Guest"}</p>
+            </Grid>
         );
     }
 }

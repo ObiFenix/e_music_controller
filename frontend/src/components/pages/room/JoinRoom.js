@@ -1,110 +1,68 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
-import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography'
+import { Button, Grid, TextField, Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
 
 export default class JoinRoom extends Component {
-    defaultVotes = 2;
-
     constructor(props) {
         super(props);
         this.state = {
-            guestCanPause: true,
-            votesToSkip: this.defaultVotes
+            roomCode: "",
+            error: ""
         };
-        this.handleVotesChange = this.handleVotesChange.bind(this)
-        this.handleGuestCanPauseChange = this.handleGuestCanPauseChange.bind(this)
-        this.handleCreateRoomButtonPressed = this.handleCreateRoomButtonPressed.bind(this)
+        this.handleTextFieldChange = this.handleTextFieldChange.bind(this);
+        this.handleJoinRoomButtonPressed = this.handleJoinRoomButtonPressed.bind(this);
     }
 
-    handleVotesChange(event) {
+    handleTextFieldChange(event) {
         this.setState({
-            votesToSkip: event.target.value
-        });
+            roomCode: event.target.value,
+            error: !event.target.value.length ? "Invalid Input" : ""
+        })
     }
 
-    handleGuestCanPauseChange(event) {
-        this.setState({
-            guestCanPause: event.target.value === "true"
-        });
-    }
-
-    handleCreateRoomButtonPressed() {
-        const requestOptions = {
+    handleJoinRoomButtonPressed(event) {
+        const requestOption = {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                votes_skip_song: this.state.votesToSkip,
-                guest_can_pause: this.state.guestCanPause
+                code: this.state.roomCode
             })
         };
 
-        fetch('/api/create-room', requestOptions)
-            .then(response => response.json())
-            .then(data => this.props.history.push(`/room/${data.code}`));
-//            .then(data => console.log(data));
+        fetch('/api/join-room', requestOption)
+            .then(response => {
+                response.ok ? this.props.history.push(`/room/${this.state.roomCode}`) : this.setState({
+                    error: 'Room not found.'
+                })
+            })
+            .catch(err => console.log(err));
     }
 
     render() {
         return (
             <Grid container spacing={1}>
                 <Grid item xs={12} align="center">
-                    <Typography component="h2" variant="h2">
-                        Join Room Page
+                    <Typography component="h4" variant="h4">
+                        Join a Room
                     </Typography>
                </Grid>
                 <Grid item xs={12} align="center">
-                    <FormControl component="fields">
-                        <FormHelperText>
-                            <p align="center">Guest Control of Playback State</p>
-                            <RadioGroup row defaultValue="true" onChange={this.handleGuestCanPauseChange}>
-                                <FormControlLabel
-                                    value="true"
-                                    control={<Radio color="primary" />}
-                                    label="Play/Pause"
-                                    labelPlacement="bottom"
-                                />
-                                <FormControlLabel
-                                    value="false"
-                                    control={<Radio color="secondary" />}
-                                    label="No Control"
-                                    labelPlacement="bottom"
-                                />
-                            </RadioGroup>
-                        </FormHelperText>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} align="center">
-                    <FormControl>
-                        <TextField
-                            required={true}
-                            type="number"
-                            defaultValue={this.defaultVotes}
-                            onChange={this.handleVotesChange}
-                            inputProps={{
-                                min: 1,
-                                style: {textAlign: "center"}
-                            }}
-                        />
-                        <FormHelperText>
-                            <div align="center">Votes Required To Skip Song</div>
-                        </FormHelperText>
-                    </FormControl>
+                    <TextField
+                        error={this.state.error}
+                        label="code"
+                        placeholder="Enter a Room Code"
+                        value={this.state.roomCode}
+                        helperText={this.state.error}
+                        onChange={this.handleTextFieldChange}
+                        variant="outlined"
+                    />
                 </Grid>
                 <Grid item xs={12} align="center">
                     <Button
                         color="primary"
                         variant="contained"
                         component={Link}
-                        onClick={this.handleCreateRoomButtonPressed}><span Style="width: 8rem">Create A Room</span>
+                        onClick={this.handleJoinRoomButtonPressed}><span Style="width: 10rem">Join</span>
                     </Button>
                 </Grid>
                 <Grid item xs={12} align="center">
@@ -112,7 +70,7 @@ export default class JoinRoom extends Component {
                         color="secondary"
                         variant="contained"
                         to="/"
-                        component={Link}><span Style="width: 8rem">Cancel</span>
+                        component={Link}><span Style="width: 10rem">Cancel</span>
                     </Button>
                 </Grid>
             </Grid>
